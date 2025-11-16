@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
-import { FileText, Eye } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { FileText, Search, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { eleves, classes } from '@/constants/mockData';
 
 type GenerationType = 'annee' | 'classe' | 'eleve';
 
 export const BulletinsPage: React.FC = () => {
   const [generationType, setGenerationType] = useState<GenerationType>('classe');
+  const [selectedClasse, setSelectedClasse] = useState('CM2 A');
+  const [searchTerm, setSearchTerm] = useState('');
 
   return (
     <div>
@@ -82,17 +86,106 @@ export const BulletinsPage: React.FC = () => {
             <select 
               className="w-full px-3 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
               disabled={generationType === 'annee'}
+              value={selectedClasse}
+              onChange={(e) => setSelectedClasse(e.target.value)}
             >
-              <option>Toutes les classes</option>
-              <option>CM2 A</option>
-              <option>CM2 B</option>
-              <option>CM1 A</option>
-              <option>CE2 A</option>
+              {classes.map(classe => (
+                <option key={classe.id} value={classe.nom}>{classe.nom}</option>
+              ))}
             </select>
           </div>
         </div>
 
-        {/* Sélection élève si nécessaire */}
+        {/* Liste des élèves pour génération par classe */}
+        {generationType === 'classe' && (
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-foreground">
+                Élèves de la classe {selectedClasse}
+              </h3>
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Rechercher un élève..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <div className="border border-border rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">Nom de l'élève</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">Classe</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">Statut paiement</th>
+                    <th className="px-4 py-3 text-right text-sm font-medium text-foreground">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {eleves
+                    .filter(eleve => eleve.classe === selectedClasse)
+                    .filter(eleve => 
+                      eleve.nom.toLowerCase().includes(searchTerm.toLowerCase())
+                    )
+                    .map((eleve) => (
+                      <tr key={eleve.id} className="hover:bg-muted/50">
+                        <td className="px-4 py-3 text-sm text-foreground">{eleve.nom}</td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground">{eleve.classe}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                              eleve.statut === 'Payé'
+                                ? 'bg-stats-green/10 text-stats-green'
+                                : eleve.statut === 'Partiel'
+                                ? 'bg-stats-orange/10 text-stats-orange'
+                                : 'bg-stats-red/10 text-stats-red'
+                            }`}
+                          >
+                            {eleve.statut}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-2"
+                            onClick={() => {
+                              // Logique de génération du bulletin
+                              console.log('Générer bulletin pour', eleve.nom);
+                            }}
+                          >
+                            <Printer className="w-4 h-4" />
+                            Générer bulletin
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+              
+              {eleves.filter(eleve => eleve.classe === selectedClasse).filter(eleve => 
+                eleve.nom.toLowerCase().includes(searchTerm.toLowerCase())
+              ).length === 0 && (
+                <div className="px-4 py-8 text-center text-muted-foreground">
+                  Aucun élève trouvé
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6">
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
+                <FileText className="w-4 h-4" />
+                Générer tous les bulletins de la classe
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Sélection élève pour génération individuelle */}
         {generationType === 'eleve' && (
           <div className="mb-6">
             <label className="block text-sm font-medium text-foreground mb-2">
@@ -100,45 +193,34 @@ export const BulletinsPage: React.FC = () => {
             </label>
             <select className="w-full px-3 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground">
               <option value="">Choisir un élève...</option>
-              <option>Kamga Jean - CM2 A</option>
-              <option>Ngo Bik Marie - CE2 B</option>
-              <option>Fouda Paul - CM1 A</option>
+              {eleves.map(eleve => (
+                <option key={eleve.id} value={eleve.id}>
+                  {eleve.nom} - {eleve.classe}
+                </option>
+              ))}
             </select>
+            
+            <div className="mt-6">
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
+                <FileText className="w-4 h-4" />
+                Générer le bulletin
+              </Button>
+            </div>
           </div>
         )}
 
-        {/* Description selon le type */}
-        <div className="bg-muted/30 border border-border rounded-md p-4 mb-6">
-          <p className="text-sm text-muted-foreground">
-            {generationType === 'annee' && (
-              <>
-                <strong>Génération par année :</strong> Tous les bulletins de toutes les classes pour l'année scolaire sélectionnée seront générés.
-              </>
-            )}
-            {generationType === 'classe' && (
-              <>
-                <strong>Génération par classe :</strong> Les bulletins de tous les élèves de la classe sélectionnée seront générés pour le trimestre choisi.
-              </>
-            )}
-            {generationType === 'eleve' && (
-              <>
-                <strong>Génération individuelle :</strong> Le bulletin de l'élève sélectionné sera généré pour le trimestre choisi.
-              </>
-            )}
-          </p>
-        </div>
-
-        {/* Boutons d'action */}
-        <div className="flex gap-3">
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <FileText className="w-4 h-4 mr-2" />
-            Générer les bulletins (PDF)
-          </Button>
-          <Button variant="outline" className="border-stats-green text-stats-green hover:bg-stats-green/10">
-            <Eye className="w-4 h-4 mr-2" />
-            Aperçu
-          </Button>
-        </div>
+        {/* Génération par année */}
+        {generationType === 'annee' && (
+          <div className="bg-muted/30 border border-border rounded-md p-4 mb-6">
+            <p className="text-sm text-muted-foreground mb-4">
+              <strong>Génération par année :</strong> Tous les bulletins de toutes les classes pour l'année scolaire sélectionnée seront générés.
+            </p>
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
+              <FileText className="w-4 h-4" />
+              Générer tous les bulletins de l'année
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -17,5 +17,11 @@ export const classes: Classe[] = [
 
 export const eleves: Eleve[] = [
   { id: 1, nom: 'Kamga Jean', classe: 'CM2 A', statut: 'Payé', montant: '75000 XAF' },
-  { id: 2, nom: 'Ngo Bik Marie', classe: 'CE2 B', statut: 'Partiel', montant: '45000 XAF' }
+  { id: 2, nom: 'Nkolo Paul', classe: 'CM2 A', statut: 'Payé', montant: '75000 XAF' },
+  { id: 3, nom: 'Mballa Sophie', classe: 'CM2 A', statut: 'Partiel', montant: '50000 XAF' },
+  { id: 4, nom: 'Essomba Pierre', classe: 'CM2 A', statut: 'Payé', montant: '75000 XAF' },
+  { id: 5, nom: 'Fotso Claudine', classe: 'CM2 A', statut: 'Impayé', montant: '0 XAF' },
+  { id: 6, nom: 'Ngo Bik Marie', classe: 'CE2 B', statut: 'Partiel', montant: '45000 XAF' },
+  { id: 7, nom: 'Onana Michel', classe: 'CE2 B', statut: 'Payé', montant: '60000 XAF' },
+  { id: 8, nom: 'Tchoua Berthe', classe: 'CE2 B', statut: 'Payé', montant: '60000 XAF' }
 ];
